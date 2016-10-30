@@ -1,0 +1,20 @@
+Work status:
+
+1) varhexutils: Done
+    -Collection of utilities for easy conversions in C
+2) varint.h/varint/c: Done
+    -Varint Encoded bytes convertor
+3) protocols.h: Mostly done, not sure if anything else is needed yet.
+    -Protocol Structure Library needed for multiaddr.
+4) protocols.c: Example of how they work so far. 
+
+5) proto-dat: Simple file to store our protocols.
+
+Todo:
+--Work on overall compatibility
+--More testing
+--Make functions simpler
+! Find working base58/base64 converters
+1) utils.h
+2) codecs.h
+3) multiaddr.h
