@@ -1,0 +1,21 @@
+STATUS:
+Compatibility: Windows/Mac/Linux/Openbsd based systems (probably more)
+-Finished Base58.h Encryption/Decryption Algorhytm
+-Finished Endian.h Library for automating compiling for Linux/Mac/Windows
+-Finished Varhexutils - Different conversion algorhytms between bytes and strings etc.
+-Finsihed Varint.h - Conversion from Hex
+-Finished Protocols.h - Library for loading protocols & manipulating them easily.
+What needs to be done (known so far):
+
+-Not finished: protoutils.h (performs final byte encodings and checks for validity
+
+-Not started: Multiaddr.h 
+(The actual thing that makes everything simple, encapsulating different protocols easily for lower 
+internet consumption and higher overall efficiency.) (Basically simulating classes from other languages for easy development)
+
+Other things to do: 
+Add conversion for bigendian machines (doubt anyone will actually need them tbh but portability was requested.)
+Should work on all platforms so far.
+Add proper documentation in case anyone needs to add protocols etc.
+
+So far it's almost finished.
