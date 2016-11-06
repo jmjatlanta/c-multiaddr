@@ -52,45 +52,79 @@ uint32_t * Varint_To_Num_32(uint8_t TON32INPUT[10]) //VARINT TO UINT32_t
 //
 char * Int_To_Hex(uint64_t int2hex) //VAR[binformat] TO HEX
 {
-	static char int2hex_result[10]="\0";
+	static char int2hex_result[20]="\0";
 	memset(int2hex_result,0,sizeof(int2hex_result));
 	sprintf (int2hex_result, "%02lX", int2hex);
 	return int2hex_result;
 }
-//
-char * Var_To_Hex(uint8_t TOHEXINPUT[10]) //VAR[binformat] TO HEX
+uint64_t Hex_To_Int(char *hex) 
 {
-	static char convert_resultz1[20]="\0";
-	memset(convert_resultz1,0,sizeof(convert_resultz1));
-	void convert(uint8_t buf[10])
+    uint64_t val = 0;
+    while (*hex) 
 	{
-		char conv_proc[10]="\0";
-		for(int i=0; i < 10; i++)
+        // get current character then increment
+        uint8_t byte = *hex++; 
+        // transform hex character to the 4bit equivalent number, using the ascii table indexes
+        if (byte >= '0' && byte <= '9') byte = byte - '0';
+        else if (byte >= 'a' && byte <='f') byte = byte - 'a' + 10;
+        else if (byte >= 'A' && byte <='F') byte = byte - 'A' + 10;    
+        // shift 4 to make space for new digit, and add the 4 bits of the new digit 
+        val = (val << 4) | (byte & 0xF);
+    }
+    return val;
+}
+//
+char * Var_To_Hex(uint8_t * TOHEXINPUT) //VAR[binformat] TO HEX
+{
+	if(TOHEXINPUT != NULL)
+	{
+	static char convert_resultz1[105]="\0";
+	memset(convert_resultz1,0,sizeof(convert_resultz1));
+	void convert(uint8_t * buf)
+	{
+		char conv_proc[100]="\0";
+		for(int i=0; i < 100; i++)
 		{
-			sprintf (conv_proc, "%02X", buf[i]);
-			//printf("%d:%d\n",i, buf[i]);
-			strcat(convert_resultz1, conv_proc);
+			if(buf[i]!=0)
+			{
+				sprintf (conv_proc, "%02X", buf[i]);
+				//printf("%d:%d\n",i, buf[i]);
+				strcat(convert_resultz1, conv_proc);
+			}
+			if(buf[i]==0 && buf[i+1]!=0)
+			{
+				sprintf (conv_proc, "%02X", buf[i]);
+				//printf("%d:%d\n",i, buf[i]);
+				strcat(convert_resultz1, conv_proc);
+			}
 		}
 	}
 	convert(TOHEXINPUT);
 	return convert_resultz1;
+	}
 }
 uint8_t * Hex_To_Var(char * Hexstr) //HEX TO VAR[BINFORMAT]
 {
-	static uint8_t buffy_HEX[10] = {0};
-	char codo[20] = "\0";
+	static uint8_t buffy_HEX[105] = {0};
+	for(int i=0;i<105;i++)
+	{
+		buffy_HEX[i] = 0;
+	}
+	char codo[105] = "\0";
 	strcpy(codo, Hexstr);
 	char code[3] = "\0";
 	int x = 0;
-	for(int i= 0;i<20;i++)
+	int fori001=0;
+	for(fori001=0;fori001<105;fori001++)
 	{
-		strncpy(&code[0],&codo[i],1);
-		strncpy(&code[1],&codo[i+1],1);
+		strncpy(&code[0],&codo[fori001],1);
+		strncpy(&code[1],&codo[fori001+1],1);
     	char *ck = NULL;
     	uint64_t lu = 0;
     	lu=strtoul(code, &ck, 16);
 		buffy_HEX[x] = lu;
-		i++;
+		//printf("%s - %lu\n",code,lu);
+		fori001++;
 		x++;
 	}
 	return buffy_HEX;

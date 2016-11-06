@@ -21,7 +21,7 @@ int protocol_REMOVE_id(int remid)//Function to remove & shift back all data, sor
 
 	if(remid < CNT_PROTOCOLNUM && remid >= 0&&CNT_PROTOCOLNUM!=0) //Checking to see if remid actually exists.
 	{
-		for(int i=remid; i<CNT_PROTOCOLNUM; ++i) //While i < num of registered protocols
+		for(int i=remid; i<CNT_PROTOCOLNUM-1; ++i) //While i < num of registered protocols //Needs to be tested that -1 is for valgrind debugging
 		{
 			strcpy((protocol_P+i)->hexcode, (protocol_P+i+1)->hexcode); //shift memory to the user we want to remove.
 			(protocol_P+i)->deccode = (protocol_P+i+1)->deccode;       	//Same as above
@@ -49,6 +49,7 @@ int protocol_REMOVE_id(int remid)//Function to remove & shift back all data, sor
 void unload_protocols()
 {
 	free(protocol_P);
+	CNT_PROTOCOLNUM=0;
 }
 void load_protocols()
 {
@@ -128,6 +129,7 @@ struct protocol * proto_with_deccode(int proto_w_deccode) //Search for protocol 
 			return (protocol_P+i); 
 		}
 	}
+	return NULL;
 }
 void pp() //Purely for debugging purposes, prints the entire loaded protocols.
 {
