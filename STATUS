@@ -5,17 +5,17 @@ Compatibility: Windows/Mac/Linux/Openbsd based systems (probably more)
 -Finished Varhexutils - Different conversion algorhytms between bytes and strings etc.
 -Finsihed Varint.h - Conversion from Hex
 -Finished Protocols.h - Library for loading protocols & manipulating them easily.
-What needs to be done (known so far):
-
--Not finished: protoutils.h (performs final byte encodings and checks for validity
-
--Not started: Multiaddr.h 
+-Finished: Multiaddr.h 
 (The actual thing that makes everything simple, encapsulating different protocols easily for lower 
 internet consumption and higher overall efficiency.) (Basically simulating classes from other languages for easy development)
+-Almost finished: protoutils.h
 
-Other things to do: 
-Add conversion for bigendian machines (doubt anyone will actually need them tbh but portability was requested.)
-Should work on all platforms so far.
-Add proper documentation in case anyone needs to add protocols etc.
+Halted & Under investigation:
+====================================
+-Varhexutils: Memory Error analysis
+-Protoutils : Memory Error analysis
+====================================
+I'd  apreciate some help on this one!
 
-So far it's almost finished.
+Things that need to be implemented:
+Protocols, everything except IP4,TCP,UDP,IPFS.
