@@ -20,27 +20,36 @@ int strpos(char *haystack, char *needle)
 }
 struct maddr
 {
-	char string[100];
+	char string[200];
 	uint8_t bytes[100];
+	int bsize[1];
 };
 struct maddr new_maddr_fb(uint8_t * byteaddress,int size)//Construct new address from bytes
 {
-	struct maddr anewaddr;
+	struct maddr anewaddr2;
 	if(byteaddress!=NULL)
 	{
-		memcpy(anewaddr.bytes, byteaddress,size);
-		if(bytes_to_string(anewaddr.string,byteaddress,size)==1)
+		memcpy(anewaddr2.bytes, byteaddress,size);
+		if(bytes_to_string(anewaddr2.string,byteaddress,size)==1)
 		{
-			return anewaddr;
+			return anewaddr2;
 		}
 	}
 }
 struct maddr new_maddr_fs(char * straddress)//Construct new address from string
 {
 	struct maddr anewaddr;
+	bzero(anewaddr.string, 100);
 	strcpy(anewaddr.string, straddress);
-	if(string_to_bytes(anewaddr.bytes,anewaddr.string,sizeof(anewaddr.string))==1)
+	anewaddr.bsize[0] = 0;
+	if(string_to_bytes(anewaddr.bytes,anewaddr.bsize,anewaddr.string,sizeof(anewaddr.string))==1)
 	{
+		int betta;
+		//printf("BSIZE: %u\n", anewaddr.bsize[0]);
+		for(betta=anewaddr.bsize[0];betta<100;betta++)
+		{
+			anewaddr.bytes[betta] = '\0';
+		}
 		return anewaddr;
 	}
 }
@@ -49,13 +58,11 @@ int m_encapsulate(struct maddr * result, char * string)
 	if(result!=NULL&&string!=NULL)
 	{
 		int success = 0;
-		char pstr[50];
-		bzero(pstr,50);
+		char pstr[100];
 		strcpy(pstr,result->string);
 		strcat(pstr,string+1);
-		if(string_to_bytes(result->bytes,pstr,sizeof(pstr)))
+		if(string_to_bytes(result->bytes,result->bsize,pstr,sizeof(pstr)))
 		{
-			printf("RESULT WOULD BE: %s\n", pstr);
 			strcpy(result->string,pstr);
 			return 1;
 		}
@@ -101,7 +108,6 @@ int m_decapsulate(struct maddr * result, char * srci)
 					procstr[i] = '/';
 				}
 			}
-			strcpy(result->string,procstr);
 			return 1;
 		}
 		else
@@ -115,4 +121,5 @@ int m_decapsulate(struct maddr * result, char * srci)
 		return 0;
 	}
 }
+
 #endif

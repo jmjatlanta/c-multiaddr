@@ -247,6 +247,7 @@ char * int2ip(int inputintip)
 {
 	uint32_t ipint = inputintip;
 	static char xxx_int2ip_result[16] = "\0";
+	bzero(xxx_int2ip_result,16);
 	uint32_t ipint0 = (ipint >> 8*3) % 256;
 	uint32_t ipint1 = (ipint >> 8*2) % 256;
 	uint32_t ipint2 = (ipint >> 8*1) % 256;
@@ -255,112 +256,100 @@ char * int2ip(int inputintip)
 	return xxx_int2ip_result;
 }
 //I didn't feel another address_bytes_to_string was necesarry sry guys
-int bytes_to_string(char * result, uint8_t * frombuf, size_t weesize)
+int bytes_to_string(char * resultzx, uint8_t * catx,int xbsize)
 {
-	char removedlines[weesize*2];
-	bzero(removedlines,sizeof(removedlines));
-	strcpy(removedlines, Var_To_Hex(frombuf));
-	//printf("Bytes to Hex: %s\n",removedlines);
+	bzero(resultzx,200);
+	uint8_t * bytes = NULL;
+	int size = 0;
+	size = xbsize;
 	load_protocols();
-	int thelastpos=0;
-	for(int i=0;i<sizeof(removedlines);i++)
+	char hex[xbsize*2];
+	bzero(hex,xbsize*2);
+	strcat(hex,Var_To_Hex(size, catx));
+	//Positioning for memory jump:
+	int lastpos = 0;
+	char pid[3];
+	//Process Hex String
+	NAX:
+	//Stage 1 ID:
+	if(lastpos!=0)
 	{
-		if(thelastpos!=0)
-		{
-			i = thelastpos;
-			thelastpos=0;
-		}
-		char protocol[2];
-		bzero(protocol,2);
-		protocol[0] = removedlines[i];
-		protocol[1] = removedlines[i+1];
-		if(proto_with_deccode(Hex_To_Int(protocol))!=NULL)
-		{
-			//printf("Cproto: %s - %lu\n",protocol,Hex_To_Int(protocol));
-			struct protocol * bprotox;
-			bprotox = proto_with_deccode(Hex_To_Int(protocol));
-			//Getting the address!
-			char the_wanted_address[50];
-			int ffpos=0;
-			int zxp=0;
-			int addrsizesofar=0;
-			bzero(the_wanted_address,50);
-			char isitp[2] = "\0";
-			bzero(isitp,2);
-			for(int zx=i+2;zx<sizeof(removedlines);zx++)
-			{
-				//printf("ZX: %d\n",zx);
-				if(zx%2==0)
-				{
-					isitp[0] = removedlines[zx];
-					isitp[1] = removedlines[zx+1];
-					struct protocol * izp;
-					izp=proto_with_deccode(Hex_To_Int(isitp));
-					if(izp)
-					{
-						
-						if(addrsizesofar == (bprotox->size/4))
-						{
-							printf("%d -- %d\n", addrsizesofar, (bprotox->size/4)); 
-							the_wanted_address[zxp]='\0';
-							thelastpos=zx;
-							printf("THELASTPOS: %d ",thelastpos);
-							break;
-						}
-						else if(addrsizesofar>(bprotox->size/4))
-						{
-							printf("MALFORMED STRING!!!\n");
-							return 0;
-						}
-
-					}
-					//printf("RL[%d]: %c\n",zx,removedlines[zx]);
-					//printf("RL[%d]: %c\n",zx,removedlines[zx+1]);
-				}
-				addrsizesofar++;
-				the_wanted_address[zxp] = removedlines[zx];
-				zxp++;
-			}
-			
-			printf("And the address:%s\n", the_wanted_address);
-			printf("With size: %d\n", addrsizesofar);
-			//printf("%d < %lu\n", i,sizeof(removedlines));
-			strcat(result, "/");
-			strcat(result,bprotox->name);
-			strcat(result, "/");
-			if(strcmp(bprotox->name,"ip4")==0)
-			{
-				strcat(result,int2ip(Hex_To_Int(the_wanted_address)));
-			}
-			else if(strcmp(bprotox->name,"tcp")==0)
-			{
-				char a[5];
-				sprintf(a,"%lu",Hex_To_Int(the_wanted_address));
-				strcat(result,a);
-			}
-			else if(strcmp(bprotox->name,"udp")==0)
-			{
-				char a[5];
-				sprintf(a,"%lu",Hex_To_Int(the_wanted_address));
-				strcat(result,a);
-			}
-			else
-			{
-				return 0;
-			}
-		}
-		i++;
+		lastpos+1;
 	}
+	pid[0] = hex[lastpos];
+	pid[1] = hex[lastpos+1];
+	pid[2] = '\0';
+	if(lastpos == 0)
+	{
+		load_protocols();
+	}
+	if(proto_with_deccode(Hex_To_Int(pid)))
+	{
+//////////Stage 2: Address
+		struct protocol * PID;
+		PID = NULL;
+		PID = proto_with_deccode(Hex_To_Int(pid));
+		lastpos = lastpos+2;
+		char address[(PID->size/4)+1];
+		bzero(address,(PID->size/4)+1);
+		address[(PID->size/4)]='\0';
+		int x=0;
+		//printf("\nHEX TO DECODE: %s\n",hex);
+		for(int i = lastpos;i<(PID->size/4)+lastpos;i++)
+		{
+			address[x] = hex[i];
+			//printf("HEX[%d]=%c\n",i,hex[i]);
+			x++;
+		}
+//////////Stage 3 Process it back to string
+		//printf("Protocol: %s\n", PID->name);
+		//printf("Address : %s\n", address);
+		lastpos= lastpos+(PID->size/4);
+		//printf("lastpos: %d",lastpos);
+		
+//////////Address:
+		//Keeping Valgrind happy
+		char name[30];
+		bzero(name,30);
+		strcpy(name, PID->name);
+		//
+		strcat(resultzx, "/");
+		strcat(resultzx, name);
+		strcat(resultzx, "/");
+		if(strcmp(name, "ip4")==0)
+		{
+			strcat(resultzx,int2ip(Hex_To_Int(address)));
+		}
+		else if(strcmp(name, "tcp")==0)
+		{
+			char a[5];
+				sprintf(a,"%lu",Hex_To_Int(address));
+				strcat(resultzx,a);
+		}
+		else if(strcmp(name, "udp")==0)
+		{
+			char a[5];
+			sprintf(a,"%lu",Hex_To_Int(address));
+			strcat(resultzx,a);
+		}
+		//printf("Address(hex):%s\n",address);
+		//printf("TESTING: %s\n",resultzx);
+/////////////Done processing this, move to next if there is more.
+		if(lastpos<size*2)
+		{
+			goto NAX;
+		}
+	}
+	strcat(resultzx, "/");
 	unload_protocols();
-	strcat(result,"/");
-	return 1;
 	
 }
-
+//
 
 char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 {
-	static char astb__stringy[10] = "\0";
+	static char astb__stringy[200] = "\0";
+	bzero(astb__stringy,200);
 	int code = 0;
 	code = xx->deccode;
 	switch(code)
@@ -368,6 +357,7 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		case 4://IPv4
 		{
 			char testip[16] = "\0";
+			bzero(testip,16);
 			strcpy(testip,abc);
 			if(is_valid_ipv4(testip)==1)
 			{
@@ -483,7 +473,7 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		}
 		case 42://IPFS - !!!
 		{
-			//abc=address
+
 			break;
 		}
 		case 480://http
@@ -519,14 +509,15 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		}
 	}
 }
-int string_to_bytes(uint8_t * finalbytes,char * strx, size_t strsize)
+int string_to_bytes(uint8_t * finalbytes,int * realbbsize,char * strx, size_t strsize)
 {
-	static char xxx[40] = "\0";
-	bzero(xxx,40);
+	static char xxx[200] = "\0";
+	bzero(xxx,200);
 	int sigmalf = 0;
 	char * totpch;
 	char totalwordstest[strsize];
-	strcpy(totalwordstest, strx);
+	bzero(totalwordstest,strsize);
+	strcat(totalwordstest, strx);
 	int totalwords = 0;
 	totpch = strtok(totalwordstest, "/");
 	while(totpch != NULL)
@@ -535,8 +526,10 @@ int string_to_bytes(uint8_t * finalbytes,char * strx, size_t strsize)
 		totalwords++;
 	}
 	int processedwords = 0;
-	char processedsofar[500] = "\0";
+	char processedsofar[100];
+	bzero(processedsofar,100);
 	char str[strsize]; //This string will be bad later.
+	bzero(str,strsize);
 	nextproc:
 	strcpy(str,strx);
 	if(str[0] == '/')
@@ -557,10 +550,12 @@ int string_to_bytes(uint8_t * finalbytes,char * strx, size_t strsize)
 				struct protocol * protx;
 				//printf("PCH-P:%s\n",pch);
 				protx = proto_with_name(pch);
-				char cut[30]="\0";
+				char cut[3]="\0";
+				bzero(cut,3);
 				strcat(cut,Int_To_Hex(protx->deccode));
 				cut[2] = '\0';
-				char finipbit[2] = "\0";
+				char finipbit[3] = "\0";
+				bzero(finipbit,3);
 				finipbit[0] = cut[0];
 				finipbit[1] = cut[1];
 				finipbit[2] = '\0';
@@ -570,7 +565,8 @@ int string_to_bytes(uint8_t * finalbytes,char * strx, size_t strsize)
 				strcat(processedsofar, pch);
 				//printf("PCH-A:%s\n",pch);
 				char addr[60] = "\0";
-				strcpy(addr, pch);
+				bzero(addr,60);
+				strcat(addr, pch);
 				//If both are ok:
 				strcat(xxx,finipbit);
 				if(address_string_to_bytes(protx, addr,sizeof(addr)))
@@ -610,30 +606,20 @@ int string_to_bytes(uint8_t * finalbytes,char * strx, size_t strsize)
 		{
 		//printf("S2B_RESULT: %s\n", xxx);
 		//static uint8_t finalbytes[100] = {0};
-		for(int i=0; i<100; i++)
-		{
-			finalbytes[i] = 0;
-		}
+		bzero(finalbytes,100);
+		//printf("XXX: %s\n",xxx);
 		memcpy(finalbytes, Hex_To_Var(xxx), 100);
-		int xtotbytes = 0;
-		for(int i=0; i<100; i++)
+		realbbsize[0] = 0;
+		for(int i=0;i<100;i++)
 		{
-			if(finalbytes[i] != 0)
+			if(finalbytes[i])
 			{
-				xtotbytes++;
+				realbbsize[0]++;
 			}
 		}
-		//printf("TOT BYTES: %d\n", xtotbytes);
-		uint8_t finalproc[sizeof(finalbytes)/sizeof(finalbytes)[0]];
-		for(int i=0;i<sizeof(finalproc); i++)
-		{
-			if(finalbytes[i] != 0)
-			{
-				finalproc[i] = '\0';
-			}
-		}			
-		//printf("FinalBytes: %s\n",finalbytes);
-		//printf("Finaltest: %s",Var_To_Hex(finalbytes));
+		//printf("FB2XXX: %s\nWith size: %u\n",Var_To_Hex(finalbytes), realbbsize[0]);
+		//realbsize = realsize;
+		//printf("REALbBSZIE: %d", realbbsize[0]);
 			return 1;//success
 		}
 		else
