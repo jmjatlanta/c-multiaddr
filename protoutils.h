@@ -258,7 +258,7 @@ char * int2ip(int inputintip)
 //I didn't feel another address_bytes_to_string was necesarry sry guys
 int bytes_to_string(char * resultzx, uint8_t * catx,int xbsize)
 {
-	bzero(resultzx,200);
+	bzero(resultzx,800);
 	uint8_t * bytes = NULL;
 	int size = 0;
 	size = xbsize;
@@ -348,8 +348,8 @@ int bytes_to_string(char * resultzx, uint8_t * catx,int xbsize)
 
 char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 {
-	static char astb__stringy[200] = "\0";
-	bzero(astb__stringy,200);
+	static char astb__stringy[800] = "\0";
+	bzero(astb__stringy,800);
 	int code = 0;
 	code = xx->deccode;
 	switch(code)
@@ -381,8 +381,8 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		{
 			if(atoi(abc)<65536&&atoi(abc)>0)
 			{
-				static char himm_woot[4] = "\0";
-				bzero(himm_woot, 4);
+				static char himm_woot[5] = "\0";
+				bzero(himm_woot, 5);
 				strcpy(himm_woot, Int_To_Hex(atoi(abc)));
 				if(himm_woot[2] == '\0')
 				{//manual switch
@@ -406,6 +406,7 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 					himm_woot[2] = swap2;
 					himm_woot[3] = swap3;
 				}
+				himm_woot[4]='\0';
 				return himm_woot;
 			}
 			else
@@ -418,8 +419,8 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		{
 			if(atoi(abc)<65536&&atoi(abc)>0)
 			{
-				static char himm_woot2[4] = "\0";
-				bzero(himm_woot2, 4);
+				static char himm_woot2[5] = "\0";
+				bzero(himm_woot2, 5);
 				strcpy(himm_woot2, Int_To_Hex(atoi(abc)));
 				if(himm_woot2[2] == '\0')
 				{//Manual Switch2be
@@ -443,6 +444,7 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 					himm_woot2[2] = swap2;
 					himm_woot2[3] = swap3;
 				}
+				himm_woot2[4]='\0';
 				return himm_woot2;
 			}
 			else
@@ -474,6 +476,7 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		case 42://IPFS - !!!
 		{
 
+			return "ERR";
 			break;
 		}
 		case 480://http
@@ -511,127 +514,99 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 }
 int string_to_bytes(uint8_t * finalbytes,int * realbbsize,char * strx, size_t strsize)
 {
-	static char xxx[200] = "\0";
-	bzero(xxx,200);
-	int sigmalf = 0;
-	char * totpch;
+	if(strx[0] != '/')
+	{
+		printf("Error, must start with '/'\n");
+		return 0;
+	}
+	char xxx[800];
+	bzero(xxx,800);
+	//Getting total words
+	int totalwords = 0;
+	char * totp;
 	char totalwordstest[strsize];
 	bzero(totalwordstest,strsize);
 	strcat(totalwordstest, strx);
-	int totalwords = 0;
-	totpch = strtok(totalwordstest, "/");
-	while(totpch != NULL)
+	totp = strtok(totalwordstest, "/");
+	while(totp != NULL)
 	{
-		totpch = strtok (NULL, "/");
+		totp = strtok (NULL, "/");
 		totalwords++;
 	}
-	int processedwords = 0;
-	char processedsofar[100];
-	bzero(processedsofar,100);
-	char str[strsize]; //This string will be bad later.
-	bzero(str,strsize);
-	nextproc:
-	strcpy(str,strx);
-	if(str[0] == '/')
+	//Initializing variables to store our processed HEX in:
+	int malf=0; //In case something goes wrong this will be 1.
+	char processed[800];//HEX CONTAINER
+	bzero(processed,800);
+	//Now Setting up variables for calculating which is the first 
+	//and second word:
+	int firstorsecond = 1; //1=Protocol && 2 = Address
+	char pstring[800];//We do not want to harm the initial string.
+	bzero(pstring,800);
+	strcat(pstring,strx);
+	//Starting to extract words and process them:
+	char * wp;
+	char * end;
+	wp=strtok_r(pstring,"/",&end);
+	load_protocols();
+	struct protocol * protx;
+	while(wp)
 	{
-		char * pch;
-		pch = strtok (str,"/");
-		load_protocols();
-		for(int ax=0;ax<processedwords;ax++)
-				{
-					pch = strtok (NULL, "/");
-				}
-		while(pch != NULL)
+		if(firstorsecond==1)//This is the Protocol
 		{
-			if(proto_with_name(pch))
+			if(proto_with_name(wp))
 			{
-				strcat(processedsofar, "/");
-				strcat(processedsofar, pch);
-				struct protocol * protx;
-				//printf("PCH-P:%s\n",pch);
-				protx = proto_with_name(pch);
-				char cut[3]="\0";
-				bzero(cut,3);
-				strcat(cut,Int_To_Hex(protx->deccode));
-				cut[2] = '\0';
-				char finipbit[3] = "\0";
-				bzero(finipbit,3);
-				finipbit[0] = cut[0];
-				finipbit[1] = cut[1];
-				finipbit[2] = '\0';
-				//Address
-				pch = strtok (NULL, "/"); // Move to supposed address
-				strcat(processedsofar, "/");
-				strcat(processedsofar, pch);
-				//printf("PCH-A:%s\n",pch);
-				char addr[60] = "\0";
-				bzero(addr,60);
-				strcat(addr, pch);
-				//If both are ok:
-				strcat(xxx,finipbit);
-				if(address_string_to_bytes(protx, addr,sizeof(addr)))
-				{
-					if(address_string_to_bytes(protx, addr,sizeof(addr)) == "ERR")
-					{
-						sigmalf = 1;
-					}
-					else
-					{
-						strcat(xxx,address_string_to_bytes(protx, addr,sizeof(addr)));
-					}
-				}
-				else
-				{
-					sigmalf = 1;
-				}
-				pch = strtok (NULL, "/"); // Next step.
-				processedwords++;
-				processedwords++;
-
+				protx=proto_with_name(wp);
+				//printf("PROTOCOL: %s\n",protx->name);
+				strcat(processed, Int_To_Hex(protx->deccode));
+				firstorsecond=2;//Since the next word will be an address
 			}
 			else
 			{
-				//This only gets triggered if the string has a wrong format
-				//Or unknown protocol!
-				printf("ERROR: MALFORMED STRING\n");
-				return 0;
+				printf("\nNo such protocol!\n\n");
+				malf=1;
+				break;
 			}
 		}
-		if(processedwords != totalwords)
+		else//This is the address
 		{
-			goto nextproc;
+			//printf("ADDRESS: %s\n",wp);
+			if(address_string_to_bytes(protx, wp,strlen(wp)) == "ERR")
+			{
+				malf = 1;
+				//printf("\n\nTRIGGERED!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+			}
+			else
+			{
+				strcat(processed,address_string_to_bytes(protx, wp,strlen(wp)));
+				//printf("Addressinbytes: %s\n",address_string_to_bytes(protx, wp,strlen(wp)));
+			}
+			protx=NULL;//Since right now it doesn't need that assignment anymore.
+			firstorsecond=1;//Since the next word will be an protocol
 		}
-		unload_protocols();
-		if(sigmalf != 1)
-		{
-		//printf("S2B_RESULT: %s\n", xxx);
-		//static uint8_t finalbytes[100] = {0};
-		bzero(finalbytes,100);
+		wp=strtok_r(NULL,"/",&end);
+	}
+	protx=NULL;
+	unload_protocols();
+	//printf("Processed contains: %s \n",processed);
+	
+	if(malf==1)
+	{
+		return 0;
+	}
+	else
+	{
+		bzero(finalbytes,400);
 		//printf("XXX: %s\n",xxx);
-		memcpy(finalbytes, Hex_To_Var(xxx), 100);
+		memcpy(finalbytes, Hex_To_Var(processed), 400);
 		realbbsize[0] = 0;
-		for(int i=0;i<100;i++)
+		for(int i=0;i<400;i++)
 		{
 			if(finalbytes[i])
 			{
 				realbbsize[0]++;
 			}
 		}
-		//printf("FB2XXX: %s\nWith size: %u\n",Var_To_Hex(finalbytes), realbbsize[0]);
-		//realbsize = realsize;
-		//printf("REALbBSZIE: %d", realbbsize[0]);
-			return 1;//success
-		}
-		else
-		{
-			printf("ERROR, MALFORMED STRING!\n");
-			return 0;
-		}
-	}
-	else
-	{
-		printf("ERROR, Multiaddr needs to start with '/'\n");
-		return 0;
+		return 1;
 	}
 }
 #endif

@@ -20,8 +20,8 @@ int strpos(char *haystack, char *needle)
 }
 struct maddr
 {
-	char string[200];
-	uint8_t bytes[100];
+	char string[800];
+	uint8_t bytes[400];
 	int bsize[1];
 };
 struct maddr new_maddr_fb(uint8_t * byteaddress,int size)//Construct new address from bytes
@@ -39,14 +39,14 @@ struct maddr new_maddr_fb(uint8_t * byteaddress,int size)//Construct new address
 struct maddr new_maddr_fs(char * straddress)//Construct new address from string
 {
 	struct maddr anewaddr;
-	bzero(anewaddr.string, 100);
+	bzero(anewaddr.string, 800);
 	strcpy(anewaddr.string, straddress);
 	anewaddr.bsize[0] = 0;
 	if(string_to_bytes(anewaddr.bytes,anewaddr.bsize,anewaddr.string,sizeof(anewaddr.string))==1)
 	{
 		int betta;
 		//printf("BSIZE: %u\n", anewaddr.bsize[0]);
-		for(betta=anewaddr.bsize[0];betta<100;betta++)
+		for(betta=anewaddr.bsize[0];betta<400;betta++)
 		{
 			anewaddr.bytes[betta] = '\0';
 		}
@@ -58,7 +58,8 @@ int m_encapsulate(struct maddr * result, char * string)
 	if(result!=NULL&&string!=NULL)
 	{
 		int success = 0;
-		char pstr[100];
+		char pstr[800];
+		bzero(pstr,800);
 		strcpy(pstr,result->string);
 		strcat(pstr,string+1);
 		if(string_to_bytes(result->bytes,result->bsize,pstr,sizeof(pstr)))

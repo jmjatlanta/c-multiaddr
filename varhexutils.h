@@ -52,7 +52,7 @@ uint32_t * Varint_To_Num_32(uint8_t TON32INPUT[60]) //VARINT TO UINT32_t
 //
 char * Int_To_Hex(uint64_t int2hex) //VAR[binformat] TO HEX
 {
-	static char int2hex_result[200]="\0";
+	static char int2hex_result[800]="\0";
 	memset(int2hex_result,0,sizeof(int2hex_result));
 	sprintf (int2hex_result, "%02lX", int2hex);
 	return int2hex_result;
@@ -78,8 +78,8 @@ uint64_t Hex_To_Int(char * hax)
 //
 void vthconvert(int size, char * crrz01, uint8_t * xbuf)
 {
-	uint8_t buf[100];
-	bzero(buf,100);
+	uint8_t buf[400];
+	bzero(buf,400);
 	
 	//fixing the buf
 	for(int cz=0; cz<size;cz++)
@@ -91,7 +91,7 @@ void vthconvert(int size, char * crrz01, uint8_t * xbuf)
 	{
 		char * crrz1 = NULL;
 		crrz1 = crrz01;
-		char conv_proc[200]="\0";
+		char conv_proc[800]="\0";
 		int i;
 		for(i=0; i < (size*2); i++)
 		{
@@ -107,32 +107,32 @@ void vthconvert(int size, char * crrz01, uint8_t * xbuf)
 }
 char * Var_To_Hex(int realsize, uint8_t * TOHEXINPUT) //VAR[binformat] TO HEX
 {
-	for(int ix=realsize;ix<100;ix++)
+	for(int ix=realsize;ix<400;ix++)
 	{
 		TOHEXINPUT[ix] = '\0';
 	}
 	if(TOHEXINPUT != NULL)
 	{
-		static char convert_resultz1[200]="\0";
-		bzero(convert_resultz1,200);
+		static char convert_resultz1[800]="\0";
+		bzero(convert_resultz1,800);
 		vthconvert(realsize, convert_resultz1, TOHEXINPUT);
 		return convert_resultz1;
 	}
 }
 uint8_t * Hex_To_Var(char * Hexstr) //HEX TO VAR[BINFORMAT]
 {
-	static uint8_t buffy_HEX[100] = {0};
-	bzero(buffy_HEX,100);
+	static uint8_t buffy_HEX[400] = {0};
+	bzero(buffy_HEX,400);
 	int i;
-	char codo[200] = "\0";
-	bzero(codo,200);
+	char codo[800] = "\0";
+	bzero(codo,800);
 	strcpy(codo, Hexstr);
 	char code[3];
 	bzero(code,3);
 	code[3]='\0';
 	int x = 0;
 	int fori001=0;
-	for(fori001=0;fori001<200;fori001++)
+	for(fori001=0;fori001<800;fori001++)
 	{
 		strncpy(&code[0],&codo[fori001],1);
 		strncpy(&code[1],&codo[fori001+1],1);
@@ -149,8 +149,8 @@ uint8_t * Hex_To_Var(char * Hexstr) //HEX TO VAR[BINFORMAT]
 //
 void convert(char * convert_result, uint8_t * buf)					//Both of them read them properly.
 {
-	char conv_proc[200]="\0";
-	bzero(conv_proc,200);
+	char conv_proc[800]="\0";
+	bzero(conv_proc,800);
 	int i;
 	for(i=0; i < 10; i++)
 	{
@@ -161,12 +161,12 @@ void convert(char * convert_result, uint8_t * buf)					//Both of them read them 
 }
 char * Num_To_HexVar_64(uint64_t TOHVINPUT) //UINT64 TO HEXIFIED VAR 
 {											//Code to varint - py
-	static char convert_result[200]="\0";//Note that the hex resulted from this will differ from py
-	bzero(convert_result,200);
+	static char convert_result[800]="\0";//Note that the hex resulted from this will differ from py
+	bzero(convert_result,800);
 	memset(convert_result,0,sizeof(convert_result));//But if you make sure the string is always 20 chars in size
-	uint8_t buf[100] = {0};
-	bzero(buf,100);
-	uvarint_encode64(TOHVINPUT, buf, 200);
+	uint8_t buf[400] = {0};
+	bzero(buf,400);
+	uvarint_encode64(TOHVINPUT, buf, 800);
 	convert(convert_result,buf);
 	return convert_result;
 }
@@ -201,13 +201,13 @@ char * Num_To_HexVar_32(uint32_t TOHVINPUT) //UINT32 TO HEXIFIED VAR
 
 uint64_t HexVar_To_Num_64(char * theHEXstring) //HEXIFIED VAR TO UINT64_T
 {											   //Varint to code - py
-	uint8_t buffy[100] = {0};
-	char codo[200] = "\0";
-	bzero(codo,200);
+	uint8_t buffy[400] = {0};
+	char codo[800] = "\0";
+	bzero(codo,800);
 	strcpy(codo, theHEXstring);
 	char code[3] = "\0";
 	int x = 0;
-	for(int i= 0;i<199;i++)
+	for(int i= 0;i<399;i++)
 	{
 		strncpy(&code[0],&codo[i],1);
 		strncpy(&code[1],&codo[i+1],1);
@@ -219,21 +219,21 @@ uint64_t HexVar_To_Num_64(char * theHEXstring) //HEXIFIED VAR TO UINT64_T
 		x++;
 	}
 	static uint64_t decoded;
-	uvarint_decode64 (buffy, 100, &decoded);
+	uvarint_decode64 (buffy, 400, &decoded);
 	return decoded;
 }
 uint32_t HexVar_To_Num_32(char theHEXstring[]) //HEXIFIED VAR TO UINT32_T
 {												//Varint to code py
-	uint8_t buffy[100] = {0};
-	bzero(buffy,100);
-	char codo[200] = "\0";
-	bzero(codo,200);
+	uint8_t buffy[400] = {0};
+	bzero(buffy,400);
+	char codo[800] = "\0";
+	bzero(codo,800);
 	strcpy(codo, theHEXstring);
 	char code[3] = "\0";
 	bzero(code,3);
 	code[3] = '\0';
 	int x = 0;
-	for(int i= 0;i<199;i++)
+	for(int i= 0;i<399;i++)
 	{
 		strncpy(&code[0],&codo[i],1);
 		strncpy(&code[1],&codo[i+1],1);
