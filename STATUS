@@ -5,17 +5,7 @@ Compatibility: Windows/Mac/Linux/Openbsd based systems (probably more)
 -Finished Varhexutils - Different conversion algorhytms between bytes and strings etc.
 -Finsihed Varint.h - Conversion from Hex
 -Finished Protocols.h - Library for loading protocols & manipulating them easily.
--Finished: Multiaddr.h 
-(The actual thing that makes everything simple, encapsulating different protocols easily for lower 
-internet consumption and higher overall efficiency.) (Basically simulating classes from other languages for easy development)
--Almost finished: protoutils.h
-
-Halted & Under investigation:
-====================================
--Varhexutils: Memory Error analysis
--Protoutils : Memory Error analysis
-====================================
-I'd  apreciate some help on this one!
-
+-Finished: Multiaddr.h (easy library for developers)
+-Finished: Protoutils.h Converting from string to hex/binary, analizing strings/bin for validity,parsing ipv4,etc.
 Things that need to be implemented:
 Protocols, everything except IP4,TCP,UDP,IPFS.
