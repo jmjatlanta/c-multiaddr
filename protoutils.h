@@ -9,8 +9,44 @@
 #include "base58.h"
 #include "varhexutils.h"
 #include "protocols.h"
-//IP2INT
+//////////////////////////////////////////////////////////
+char ASCII2bits(char ch) {
+   if (ch >= '0' && ch <= '9') {
+      return (ch - '0');
+   } else if (ch >= 'a' && ch <= 'z') {
+      return (ch - 'a') + 10;
+   } else if (ch >= 'A' && ch <= 'Z') {
+      return (ch - 'A') + 10;
+   }
+   return 0; // fail
+}
 
+void hex2bin (char *dst, char *src, int len)
+{
+    while (len--) {
+        *dst    = ASCII2bits(*src++) << 4; // higher bits
+        *dst++ |= ASCII2bits(*src++);      // lower  bits
+    }
+}
+
+char bits2ASCII(char b) {
+   if (b >= 0 && b < 10) {
+      return (b + '0');
+   } else if (b >= 10 && b <= 15) {
+      return (b - 10 + 'a');
+   }
+   return 0; // fail
+}
+
+void bin2hex (char *dst, char *src, int len)
+{
+    while (len--) {
+        *dst++ = bits2ASCII((*src >> 4) & 0xf);    // higher bits
+        *dst++ = bits2ASCII(*src++ & 0xf); // lower  bits
+    }
+    *dst = '\0';
+}
+//////////////////////////////////////////////////////////
 //IPv4 VALIDATOR
 #define DELIM "."
  
@@ -196,7 +232,6 @@ int is_valid_ipv6(char *str)
 
     return(err==0);
 }
-///Still in work
 uint64_t ip2int(char * ipconvertint)
 {
 	uint64_t final_result =0;
@@ -289,55 +324,104 @@ int bytes_to_string(char * resultzx, uint8_t * catx,int xbsize)
 		struct protocol * PID;
 		PID = NULL;
 		PID = proto_with_deccode(Hex_To_Int(pid));
-		lastpos = lastpos+2;
-		char address[(PID->size/4)+1];
-		bzero(address,(PID->size/4)+1);
-		address[(PID->size/4)]='\0';
-		int x=0;
-		//printf("\nHEX TO DECODE: %s\n",hex);
-		for(int i = lastpos;i<(PID->size/4)+lastpos;i++)
+		if(strcmp(PID->name,"ipfs")!=0)
 		{
-			address[x] = hex[i];
-			//printf("HEX[%d]=%c\n",i,hex[i]);
-			x++;
-		}
-//////////Stage 3 Process it back to string
-		//printf("Protocol: %s\n", PID->name);
-		//printf("Address : %s\n", address);
-		lastpos= lastpos+(PID->size/4);
-		//printf("lastpos: %d",lastpos);
-		
-//////////Address:
-		//Keeping Valgrind happy
-		char name[30];
-		bzero(name,30);
-		strcpy(name, PID->name);
-		//
-		strcat(resultzx, "/");
-		strcat(resultzx, name);
-		strcat(resultzx, "/");
-		if(strcmp(name, "ip4")==0)
-		{
-			strcat(resultzx,int2ip(Hex_To_Int(address)));
-		}
-		else if(strcmp(name, "tcp")==0)
-		{
-			char a[5];
+			lastpos = lastpos+2;
+			char address[(PID->size/4)+1];
+			bzero(address,(PID->size/4)+1);
+			address[(PID->size/4)]='\0';
+			int x=0;
+			//printf("\nHEX TO DECODE: %s\n",hex);
+			for(int i = lastpos;i<(PID->size/4)+lastpos;i++)
+			{
+				address[x] = hex[i];
+				//printf("HEX[%d]=%c\n",i,hex[i]);
+				x++;
+			}
+	//////////Stage 3 Process it back to string
+			//printf("Protocol: %s\n", PID->name);
+			//printf("Address : %s\n", address);
+			lastpos= lastpos+(PID->size/4);
+			//printf("lastpos: %d",lastpos);
+			
+	//////////Address:
+			//Keeping Valgrind happy
+			char name[30];
+			bzero(name,30);
+			strcpy(name, PID->name);
+			//
+			strcat(resultzx, "/");
+			strcat(resultzx, name);
+			strcat(resultzx, "/");
+			if(strcmp(name, "ip4")==0)
+			{
+				strcat(resultzx,int2ip(Hex_To_Int(address)));
+			}
+			else if(strcmp(name, "tcp")==0)
+			{
+				char a[5];
+					sprintf(a,"%lu",Hex_To_Int(address));
+					strcat(resultzx,a);
+			}
+			else if(strcmp(name, "udp")==0)
+			{
+				char a[5];
 				sprintf(a,"%lu",Hex_To_Int(address));
 				strcat(resultzx,a);
+			}
+			//printf("Address(hex):%s\n",address);
+			//printf("TESTING: %s\n",resultzx);
+	/////////////Done processing this, move to next if there is more.
+			if(lastpos<size*2)
+			{
+				goto NAX;
+			}
 		}
-		else if(strcmp(name, "udp")==0)
+		else//IPFS CASE
 		{
-			char a[5];
-			sprintf(a,"%lu",Hex_To_Int(address));
-			strcat(resultzx,a);
-		}
-		//printf("Address(hex):%s\n",address);
-		//printf("TESTING: %s\n",resultzx);
-/////////////Done processing this, move to next if there is more.
-		if(lastpos<size*2)
-		{
-			goto NAX;
+			
+			lastpos = lastpos + 4;
+			//FETCHING SIZE OF ADDRESS
+			char prefixedvarint[3];
+			bzero(prefixedvarint,3);
+			int pvi;
+			pvi=0;
+			for(int i=lastpos-2;i<lastpos;i++)
+			{
+				prefixedvarint[pvi] = hex[i];
+				pvi++;
+			}
+			int addrsize;
+			addrsize = HexVar_To_Num_32(prefixedvarint);
+			unsigned char IPFS_ADDR[addrsize+1];
+			bzero(IPFS_ADDR,addrsize+1);
+			int IPFS_PARSE;
+			IPFS_PARSE = 0;
+			for(int i = lastpos;i<lastpos+addrsize;i++)
+			{
+				IPFS_ADDR[IPFS_PARSE] = hex[i];
+				//printf("\nIPFS_ADDR[%d] = %c\n\n",IPFS_PARSE,hex[i]);
+				IPFS_PARSE++;
+			}
+			unsigned char addrbuf[strlen(IPFS_ADDR)/2];
+			bzero(addrbuf,strlen(IPFS_ADDR)/2);
+			memcpy(addrbuf,Hex_To_Var(IPFS_ADDR),sizeof(addrbuf));
+			size_t rezbuflen = strlen(IPFS_ADDR);
+			unsigned char rezultat[rezbuflen];
+			bzero(rezultat,rezbuflen);
+			unsigned char * pointyaddr = NULL;
+			pointyaddr = rezultat;
+			int returnstatus = 0;
+			returnstatus = libp2p_crypto_encoding_base58_encode(addrbuf, sizeof(addrbuf), &pointyaddr, &rezbuflen);
+			if(returnstatus == 0)
+			{
+				printf("\nERROR!!!!!\n");
+				return 0;
+			}
+			strcat(resultzx, "/");
+			strcat(resultzx, PID->name);
+			strcat(resultzx, "/");
+			strcat(resultzx, rezultat);
 		}
 	}
 	strcat(resultzx, "/");
@@ -475,8 +559,48 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		}
 		case 42://IPFS - !!!
 		{
+		
 
-			return "ERR";
+			char * x_data = NULL;
+			x_data = abc;
+			size_t x_data_length = strlen(x_data);
+			size_t result_buffer_length = libp2p_crypto_encoding_base58_decode_max_size(x_data);
+			unsigned char result_buffer[result_buffer_length];
+			unsigned char* ptr_to_result = result_buffer;
+			memset(result_buffer, 0, result_buffer_length);
+			// now get the decoded address
+			int return_value = libp2p_crypto_encoding_base58_decode(x_data, x_data_length, &ptr_to_result, &result_buffer_length);
+			if (return_value == 0)
+			{
+				return "ERR";
+			}
+			// throw everything in a hex string so we can debug the results
+			static char returning_result[300];
+			bzero(returning_result,300);
+			char ADDR_ENCODED[300];
+			bzero(ADDR_ENCODED,300);
+			int ilen = 0;
+			bzero(returning_result,300);
+			for(int i = 0; i < result_buffer_length; i++) 
+			{
+				// get the char so we can see it in the debugger
+				unsigned char c = ptr_to_result[i];
+				char miu[3];
+				bzero(miu, 3);
+				miu[3] = '\0';
+				sprintf(miu,"%02x", c);
+				
+				strcat(ADDR_ENCODED, miu);			
+			}
+			ilen = strlen(ADDR_ENCODED);
+			char prefixed[3];
+			strcpy(prefixed,Num_To_HexVar_32(ilen));
+			prefixed[3] = '\0';
+			strcat(returning_result, prefixed);
+			strcat(returning_result, ADDR_ENCODED);
+			//printf("ADDRESS: %s\nSIZEADDR: %d\n",ADDR_ENCODED,ilen);
+			//printf("NOW DECODED VARINT: %d", HexVar_To_Num_32(prefixed));
+			return returning_result;
 			break;
 		}
 		case 480://http

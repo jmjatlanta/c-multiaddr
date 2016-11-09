@@ -5,20 +5,12 @@
  * under the terms of the standard MIT license.  See COPYING for more details.
  */
 
-#ifndef WIN32
-#include <arpa/inet.h>
-#else
-#include <winsock2.h>
-#endif
-
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <string.h>
+#include <math.h>
+#include <stdint.h>
+#include <sys/types.h>
 
-#include "base58.h"
-
-bool (*b58_sha256_impl)(void *, const void *, size_t) = NULL;
+static const char b58digits_ordered[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 static const int8_t b58digits_map[] = {
 	-1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
@@ -31,11 +23,19 @@ static const int8_t b58digits_map[] = {
 	47,48,49,50,51,52,53,54, 55,56,57,-1,-1,-1,-1,-1,
 };
 
-bool b58tobin(void *bin, size_t *binszp, const char *b58, size_t b58sz)
+/**
+ * convert a base58 encoded string into a binary array
+ * @param b58 the base58 encoded string
+ * @param base58_size the size of the encoded string
+ * @param bin the results buffer
+ * @param binszp the size of the results buffer
+ * @returns true(1) on success
+ */
+int libp2p_crypto_encoding_base58_decode(const char* b58, size_t base58_size, unsigned char** bin, size_t* binszp)
 {
 	size_t binsz = *binszp;
-	const unsigned char *b58u = (void*)b58;
-	unsigned char *binu = bin;
+	const unsigned char* b58u = (const void*)b58;
+	unsigned char* binu = *bin;
 	size_t outisz = (binsz + 3) / 4;
 	uint32_t outi[outisz];
 	uint64_t t;
@@ -44,157 +44,158 @@ bool b58tobin(void *bin, size_t *binszp, const char *b58, size_t b58sz)
 	uint8_t bytesleft = binsz % 4;
 	uint32_t zeromask = bytesleft ? (0xffffffff << (bytesleft * 8)) : 0;
 	unsigned zerocount = 0;
+	size_t b58sz;
 	
-	if (!b58sz)
-		b58sz = strlen(b58);
+	b58sz = strlen(b58);
 	
 	memset(outi, 0, outisz * sizeof(*outi));
 	
 	// Leading zeros, just count
-	for (i = 0; i < b58sz && b58u[i] == '1'; ++i)
+	for (i = 0; i < b58sz && !b58digits_map[b58u[i]]; ++i) {
 		++zerocount;
+	}
 	
-	for ( ; i < b58sz; ++i)
-	{
-		if (b58u[i] & 0x80)
+	for (; i < b58sz; ++i) {
+		if (b58u[i] & 0x80) {
 			// High-bit set on invalid digit
-			return false;
-		if (b58digits_map[b58u[i]] == -1)
+			return 0;
+		}
+		if (b58digits_map[b58u[i]] == -1) {
 			// Invalid base58 digit
-			return false;
+			return 0;
+		}
 		c = (unsigned)b58digits_map[b58u[i]];
-		for (j = outisz; j--; )
-		{
+		for (j = outisz; j--;) {
 			t = ((uint64_t)outi[j]) * 58 + c;
 			c = (t & 0x3f00000000) >> 32;
 			outi[j] = t & 0xffffffff;
 		}
-		if (c)
+		if (c) {
 			// Output number too big (carry to the next int32)
-			return false;
-		if (outi[0] & zeromask)
+			memset(outi, 0, outisz * sizeof(*outi));
+			return 0;
+		}
+		if (outi[0] & zeromask) {
 			// Output number too big (last int32 filled too far)
-			return false;
+			memset(outi, 0, outisz * sizeof(*outi));
+			return 0;
+		}
 	}
 	
 	j = 0;
 	switch (bytesleft) {
 		case 3:
-			*(binu++) = (outi[0] &   0xff0000) >> 16;
+			*(binu++) = (outi[0] & 0xff0000) >> 16;
 		case 2:
-			*(binu++) = (outi[0] &     0xff00) >>  8;
+			*(binu++) = (outi[0] & 0xff00) >> 8;
 		case 1:
-			*(binu++) = (outi[0] &       0xff);
+			*(binu++) = (outi[0] & 0xff);
 			++j;
 		default:
 			break;
 	}
 	
-	for (; j < outisz; ++j)
-	{
+	for (; j < outisz; ++j) {
 		*(binu++) = (outi[j] >> 0x18) & 0xff;
 		*(binu++) = (outi[j] >> 0x10) & 0xff;
-		*(binu++) = (outi[j] >>    8) & 0xff;
-		*(binu++) = (outi[j] >>    0) & 0xff;
+		*(binu++) = (outi[j] >> 8) & 0xff;
+		*(binu++) = (outi[j] >> 0) & 0xff;
 	}
 	
 	// Count canonical base58 byte count
-	binu = bin;
-	for (i = 0; i < binsz; ++i)
-	{
-		if (binu[i])
+	binu = *bin;
+	for (i = 0; i < binsz; ++i) {
+		if (binu[i]) {
 			break;
+		}
 		--*binszp;
 	}
 	*binszp += zerocount;
 	
-	return true;
+	memset(outi, 0, outisz * sizeof(*outi));
+	return 1;
 }
 
-static
-bool my_dblsha256(void *hash, const void *data, size_t datasz)
+/**
+ * encode an array of bytes into a base58 string
+ * @param binary_data the data to be encoded
+ * @param binary_data_size the size of the data to be encoded
+ * @param base58 the results buffer
+ * @param base58_size the size of the results buffer
+ * @returns true(1) on success
+ */
+//int libp2p_crypto_encoding_base58_encode(const unsigned char* binary_data, size_t binary_data_size, unsigned char* base58, size_t* base58_size)
+int libp2p_crypto_encoding_base58_encode(const unsigned char* data, size_t binsz, unsigned char** b58, size_t* b58sz)
 {
-	uint8_t buf[0x20];
-	return b58_sha256_impl(buf, data, datasz) && b58_sha256_impl(hash, buf, sizeof(buf));
-}
-
-int b58check(const void *bin, size_t binsz, const char *base58str, size_t b58sz)
-{
-	unsigned char buf[32];
-	const uint8_t *binc = bin;
-	unsigned i;
-	if (binsz < 4)
-		return -4;
-	if (!my_dblsha256(buf, bin, binsz - 4))
-		return -2;
-	if (memcmp(&binc[binsz - 4], buf, 4))
-		return -1;
-	
-	// Check number of zeros is correct AFTER verifying checksum (to avoid possibility of accessing base58str beyond the end)
-	for (i = 0; binc[i] == '\0' && base58str[i] == '1'; ++i)
-	{}  // Just finding the end of zeros, nothing to do in loop
-	if (binc[i] == '\0' || base58str[i] == '1')
-		return -3;
-	
-	return binc[0];
-}
-
-static const char b58digits_ordered[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-
-bool b58enc(char *b58, size_t *b58sz, const void *data, size_t binsz)
-{
-	const uint8_t *bin = data;
+	const uint8_t* bin = data;
 	int carry;
 	ssize_t i, j, high, zcount = 0;
 	size_t size;
 	
-	while (zcount < binsz && !bin[zcount])
+	while (zcount < (ssize_t)binsz && !bin[zcount]) {
 		++zcount;
+	}
 	
 	size = (binsz - zcount) * 138 / 100 + 1;
 	uint8_t buf[size];
 	memset(buf, 0, size);
 	
-	for (i = zcount, high = size - 1; i < binsz; ++i, high = j)
-	{
-		for (carry = bin[i], j = size - 1; (j > high) || carry; --j)
-		{
+	for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
+		for (carry = bin[i], j = size - 1; (j > high) || carry; --j) {
 			carry += 256 * buf[j];
 			buf[j] = carry % 58;
 			carry /= 58;
 		}
 	}
 	
-	for (j = 0; j < size && !buf[j]; ++j);
+	for (j = 0; j < (ssize_t)size && !buf[j]; ++j)
+		;
 	
-	if (*b58sz <= zcount + size - j)
-	{
+	if (*b58sz <= zcount + size - j) {
 		*b58sz = zcount + size - j + 1;
-		return false;
+		memset(buf, 0, size);
+		return 0;
 	}
 	
-	if (zcount)
+	if (zcount) {
 		memset(b58, '1', zcount);
-	for (i = zcount; j < size; ++i, ++j)
-		b58[i] = b58digits_ordered[buf[j]];
-	b58[i] = '\0';
+	}
+	for (i = zcount; j < (ssize_t)size; ++i, ++j) {
+		(*b58)[i] = b58digits_ordered[buf[j]];
+	}
+	(*b58)[i] = '\0';
 	*b58sz = i + 1;
 	
-	return true;
+	memset(buf, 0, size);
+	return 1;
 }
 
-bool b58check_enc(char *b58c, size_t *b58c_sz, uint8_t ver, const void *data, size_t datasz)
-{
-	uint8_t buf[1 + datasz + 0x20];
-	uint8_t *hash = &buf[1 + datasz];
+/***
+ * calculate the size of the binary results based on an incoming base58 string
+ * @param base58_string the string
+ * @returns the size in bytes had the string been decoded
+ */
+size_t libp2p_crypto_encoding_base58_decode_size(const unsigned char* base58_string) {
+	size_t string_length = strlen((char*)base58_string);
+	size_t decoded_length = 0;
+	size_t radix = strlen(b58digits_ordered);
+	double bits_per_digit = log2(radix);
 	
-	buf[0] = ver;
-	memcpy(&buf[1], data, datasz);
-	if (!my_dblsha256(hash, buf, datasz + 1))
-	{
-		*b58c_sz = 0;
-		return false;
-	}
+	decoded_length = floor(string_length * bits_per_digit / 8);
+	return decoded_length;
+}
+
+/**
+ * calculate the max length in bytes of an encoding of n source bits
+ * @param base58_string the string
+ * @returns the maximum size in bytes had the string been decoded
+ */
+size_t libp2p_crypto_encoding_base58_decode_max_size(const unsigned char* base58_string) {
+	size_t string_length = strlen((char*)base58_string);
+	size_t decoded_length = 0;
+	size_t radix = strlen(b58digits_ordered);
+	double bits_per_digit = log2(radix);
 	
-	return b58enc(b58c, b58c_sz, buf, 1 + datasz + 4);
+	decoded_length = ceil(string_length * bits_per_digit / 8);
+	return decoded_length;
 }

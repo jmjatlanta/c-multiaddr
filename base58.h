@@ -1,24 +1,47 @@
-#ifndef LIBBASE58_H
-#define LIBBASE58_H
+//
+//  base58.h
+//  libp2p_xcode
+//
+//  Created by John Jones on 11/7/16.
+//  Copyright © 2016 JMJAtlanta. All rights reserved.
+//
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#ifndef base58_h
+#define base58_h
+#include "varint.h"
+/**
+ * convert a base58 encoded string into a binary array
+ * @param base58 the base58 encoded string
+ * @param base58_size the size of the encoded string
+ * @param binary_data the results buffer
+ * @param binary_data_size the size of the results buffer
+ * @returns true(1) on success
+ */
+int libp2p_crypto_encoding_base58_decode(const unsigned char* base58, size_t base58_size, unsigned char** binary_data, size_t *binary_data_size);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * encode an array of bytes into a base58 string
+ * @param binary_data the data to be encoded
+ * @param binary_data_size the size of the data to be encoded
+ * @param base58 the results buffer
+ * @param base58_size the size of the results buffer
+ * @returns true(1) on success
+ */
+int libp2p_crypto_encoding_base58_encode(const unsigned char* binary_data, size_t binary_data_size, unsigned char** base58, size_t* base58_size);
 
-extern bool (*b58_sha256_impl)(void *, const void *, size_t);
+/***
+ * calculate the size of the binary results based on an incoming base58 string with no initial padding
+ * @param base58_string the string
+ * @returns the size in bytes had the string been decoded
+ */
+size_t libp2p_crypto_encoding_base58_decode_size(const unsigned char* base58_string);
 
-extern bool b58tobin(void *bin, size_t *binsz, const char *b58, size_t b58sz);
-extern int b58check(const void *bin, size_t binsz, const char *b58, size_t b58sz);
+/**
+ * calculate the max length in bytes of an encoding of n source bits
+ * @param base58_string the string
+ * @returns the maximum size in bytes had the string been decoded
+ */
+size_t libp2p_crypto_encoding_base58_decode_max_size(const unsigned char* base58_string);
 
-extern bool b58enc(char *b58, size_t *b58sz, const void *bin, size_t binsz);
-extern bool b58check_enc(char *b58c, size_t *b58c_sz, uint8_t ver, const void *data, size_t datasz);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* base58_h */
