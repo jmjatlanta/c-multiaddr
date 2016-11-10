@@ -15,6 +15,7 @@ int bsize[]; //int[1] that contains the real bytes size (Use it whenever using t
 ## Obtaining the byte buffer(.bytes, .bsize[0]):
   printf("TEST BYTES: %s\n",Var_To_Hex(a.bsize[0], a.bytes));
   Var_To_Hex = Byte Buffer to Hex String
+  Hex_To_Var = Hex String to Byte Buffer
 ## Encapsulation & Decapsulation(m_encapsulate, m_decapsulate)
 #### Remember, Decapsulation happens from right to left, never in reverse, if you have /ip4/udp/ipfs/ if you decapsulate "udp" you will also take out ipfs! 
 * Now the string is: /ip4/192.168.1.1/
