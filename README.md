@@ -5,9 +5,10 @@ multiaddr for IPFS in C.
 # Usage:
 #### All you need to include is multiaddr.h
 ## Maddr struct:
-char string[]; // String that contains addresses such as /ip4/192.168.1.1/
-uint8_t bytes; //String that contains the enecoded address
-int bsize[]; //int[1] that contains the real bytes size (Use it whenever using the bytes so you don't input trash!)
+* char string[]; // String that contains addresses such as /ip4/192.168.1.1/
+* uint8_t bytes; //String that contains the enecoded address
+* int bsize[]; //int[1] that contains the real bytes size (Use it whenever using the bytes so you don't input trash!)
+
 ## New Multi Address From String(new_maddr_fs)
   char addrstr[] = "/ip4/192.168.1.1/"
 	struct maddr a;
