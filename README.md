@@ -16,17 +16,17 @@ int bsize[]; //int[1] that contains the real bytes size (Use it whenever using t
   printf("TEST BYTES: %s\n",Var_To_Hex(a.bsize[0], a.bytes));
   Var_To_Hex = Byte Buffer to Hex String
 ## Encapsulation & Decapsulation(m_encapsulate, m_decapsulate)
-Remember, Decapsulation happens from right to left, never in reverse, if you have /ip4/udp/ipfs/ if you decapsulate "udp" you will also take out ipfs!
-  Now the string is: /ip4/192.168.1.1/
-  m_encapsulate(&a,"/udp/3333/"); //Adds udp/3333/ to char addrstr
-  Now the string is: /ip4/192.168.1.1/udp/3333/
-  m_decapsulate(&a,"udp"); //Removes udp protocol and its address
-  Now the string is: /ip4/192.168.1.1/
-	m_encapsulate(&a,"/tcp/8080");
-	Now the string is: /ip4/192.168.1.1/tcp/8080/
+#### Remember, Decapsulation happens from right to left, never in reverse, if you have /ip4/udp/ipfs/ if you decapsulate "udp" you will also take out ipfs! 
+* Now the string is: /ip4/192.168.1.1/
+* m_encapsulate(&a,"/udp/3333/"); //Adds udp/3333/ to char addrstr
+* Now the string is: /ip4/192.168.1.1/udp/3333/
+* m_decapsulate(&a,"udp"); //Removes udp protocol and its address
+* Now the string is: /ip4/192.168.1.1/
+* m_encapsulate(&a,"/tcp/8080");
+* Now the string is: /ip4/192.168.1.1/tcp/8080/
 # Constructing a multiaddress from bytes:
-  struct maddr beta;
-	beta=new_maddr_fb(a.bytes,a.bsize[0]); //This will already construct back to the string too!
-	printf("B STRING: %s\n",beta.string);  //So after encapsulation and decapsulation atm this string would
-  contain: /ip4/192.168.1.1/tcp/8080/
+* struct maddr beta;
+* beta=new_maddr_fb(a.bytes,a.bsize[0]); //This will already construct back to the string too!
+* printf("B STRING: %s\n",beta.string);  //So after encapsulation and decapsulation atm this string would 
+* contain: /ip4/192.168.1.1/tcp/8080/
  
