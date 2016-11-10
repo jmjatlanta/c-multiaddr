@@ -23,10 +23,12 @@ int bsize[]; //int[1] that contains the real bytes size (Use it whenever using t
 * m_decapsulate(&a,"udp"); //Removes udp protocol and its address
 * Now the string is: /ip4/192.168.1.1/
 * m_encapsulate(&a,"/tcp/8080");
-* Now the string is: /ip4/192.168.1.1/tcp/8080/
+* Now the string is: /ip4/192.168.1.1/tcp/8080/ 
+
 # Constructing a multiaddress from bytes:
+
 * struct maddr beta;
 * beta=new_maddr_fb(a.bytes,a.bsize[0]); //This will already construct back to the string too!
 * printf("B STRING: %s\n",beta.string);  //So after encapsulation and decapsulation atm this string would 
-* contain: /ip4/192.168.1.1/tcp/8080/
+* contain: /ip4/192.168.1.1/tcp/8080/ 
  
