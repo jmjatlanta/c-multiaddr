@@ -3,7 +3,7 @@ multiaddr for IPFS in C.
 
 ### Multiaddr provides easy networking protocols nesting, easy encapsulation of extra protocols, easy tunneling, etc.
 # Usage:
-# All you need to include is multiaddr.h
+#### All you need to include is multiaddr.h
 ## Maddr struct:
 char string[]; // String that contains addresses such as /ip4/192.168.1.1/
 uint8_t bytes; //String that contains the enecoded address
