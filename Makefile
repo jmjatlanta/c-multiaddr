@@ -5,7 +5,7 @@ ifdef DEBUG
 CFLAGS += -g3
 endif
 
-LFLAGS = -lmultiaddr
+LFLAGS = -lm
 DEPS = include/multiaddr/base58.h include/multiaddr/endian.h include/multiaddr/multiaddr.h \
 	include/multiaddr/protocols.h include/multiaddr/protoutils.h include/multiaddr/varhexutils.h \
 	include/multiaddr/varint.h
@@ -17,7 +17,7 @@ OBJS = base58.o varint.o
 libmultiaddr.a: $(OBJS)
 	ar rcs $@ $^
 
-test_multiaddr: libmultiaddr.a testing.o
+test_multiaddr: testing.o libmultiaddr.a
 	$(CC) -o $@ $^ $(LFLAGS)
 
 all: test_multiaddr

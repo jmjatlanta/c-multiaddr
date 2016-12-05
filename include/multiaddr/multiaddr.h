@@ -1,7 +1,7 @@
 #ifndef MULTIADDR
 #define MULTIADDR
 #include "varhexutils.h"
-#include "codecs.h"
+//#include "codecs.h"
 #include "varint.h"
 #include "protocols.h"
 #include "protoutils.h"
@@ -35,6 +35,7 @@ struct maddr new_maddr_fb(uint8_t * byteaddress,int size)//Construct new address
 			return anewaddr2;
 		}
 	}
+	return anewaddr2;
 }
 struct maddr new_maddr_fs(char * straddress)//Construct new address from string
 {
@@ -52,6 +53,7 @@ struct maddr new_maddr_fs(char * straddress)//Construct new address from string
 		}
 		return anewaddr;
 	}
+	return anewaddr;
 }
 int m_encapsulate(struct maddr * result, char * string)
 {
