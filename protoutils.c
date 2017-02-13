@@ -636,6 +636,14 @@ char * address_string_to_bytes(struct protocol * xx, const char * abc,size_t get
 		}
 	}
 }
+
+/**
+ * convert a string address into bytes
+ * @param finalbytes the destination
+ * @param realbbsize the ultimate size of the destination
+ * @param strx the incoming string
+ * @param strsize the string length
+ */
 int string_to_bytes(uint8_t * finalbytes, size_t* realbbsize, char * strx, size_t strsize)
 {
 	if(strx[0] != '/')
@@ -643,13 +651,11 @@ int string_to_bytes(uint8_t * finalbytes, size_t* realbbsize, char * strx, size_
 		printf("Error, must start with '/'\n");
 		return 0;
 	}
-	char xxx[800];
-	bzero(xxx,800);
 	//Getting total words
 	int totalwords = 0;
-	char * totp;
-	char totalwordstest[strsize];
-	bzero(totalwordstest,strsize);
+	char* totp;
+	char totalwordstest[strsize + 1];
+	bzero(totalwordstest,strsize + 1);
 	strcat(totalwordstest, strx);
 	totp = strtok(totalwordstest, "/");
 	while(totp != NULL)
@@ -664,8 +670,8 @@ int string_to_bytes(uint8_t * finalbytes, size_t* realbbsize, char * strx, size_
 	//Now Setting up variables for calculating which is the first
 	//and second word:
 	int firstorsecond = 1; //1=Protocol && 2 = Address
-	char pstring[800];//We do not want to harm the initial string.
-	bzero(pstring,800);
+	char pstring[strsize + 1];//We do not want to harm the initial string.
+	bzero(pstring,strsize + 1);
 	strcat(pstring,strx);
 	//Starting to extract words and process them:
 	char * wp;

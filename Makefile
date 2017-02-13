@@ -1,6 +1,9 @@
 CC = gcc
 CFLAGS = -O0 -I include 
 
+DEBUG = true
+
+
 ifdef DEBUG
 CFLAGS += -g3
 endif
