@@ -232,7 +232,7 @@ int is_valid_ipv6(char *str)
 
     return(err==0);
 }
-uint64_t ip2int(char * ipconvertint)
+uint64_t ip2int(const char * ipconvertint)
 {
 	uint64_t final_result =0;
 	char * iproc;
@@ -291,7 +291,7 @@ char * int2ip(int inputintip)
 	return xxx_int2ip_result;
 }
 //I didn't feel another address_bytes_to_string was necesarry sry guys
-int bytes_to_string(char * resultzx, uint8_t * catx,int xbsize)
+int bytes_to_string(char * resultzx, const uint8_t* catx,int xbsize)
 {
 	bzero(resultzx,800);
 	uint8_t * bytes = NULL;
@@ -430,7 +430,7 @@ int bytes_to_string(char * resultzx, uint8_t * catx,int xbsize)
 }
 //
 
-char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
+char * address_string_to_bytes(struct protocol * xx, const char * abc,size_t getsznow)
 {
 	static char astb__stringy[800] = "\0";
 	bzero(astb__stringy,800);
@@ -562,7 +562,7 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 
 
 			char * x_data = NULL;
-			x_data = abc;
+			x_data = (char*)abc;
 			size_t x_data_length = strlen(x_data);
 			size_t result_buffer_length = multiaddr_encoding_base58_decode_size((unsigned char*)x_data);
 			unsigned char result_buffer[result_buffer_length];
@@ -636,7 +636,7 @@ char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow)
 		}
 	}
 }
-int string_to_bytes(uint8_t * finalbytes,int * realbbsize,char * strx, size_t strsize)
+int string_to_bytes(uint8_t * finalbytes, size_t* realbbsize, char * strx, size_t strsize)
 {
 	if(strx[0] != '/')
 	{

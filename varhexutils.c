@@ -77,7 +77,7 @@ uint64_t Hex_To_Int(char * hax)
 	return val;
 }
 //
-void vthconvert(int size, char * crrz01, uint8_t * xbuf)
+void vthconvert(int size, char * crrz01, const uint8_t * xbuf)
 {
 	uint8_t buf[400];
 	bzero(buf,400);
@@ -106,12 +106,8 @@ void vthconvert(int size, char * crrz01, uint8_t * xbuf)
 		crrz1 = NULL;
 	}
 }
-char * Var_To_Hex(int realsize, uint8_t * TOHEXINPUT) //VAR[binformat] TO HEX
+char * Var_To_Hex(int realsize, const uint8_t * TOHEXINPUT) //VAR[binformat] TO HEX
 {
-	for(int ix=realsize;ix<400;ix++)
-	{
-		TOHEXINPUT[ix] = '\0';
-	}
 	if(TOHEXINPUT != NULL)
 	{
 		static char convert_resultz1[800]="\0";

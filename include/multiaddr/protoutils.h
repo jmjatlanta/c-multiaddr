@@ -27,15 +27,15 @@ int ishexdigit(char ch);
 
 int is_valid_ipv6(char *str);
 
-uint64_t ip2int(char * ipconvertint);
+uint64_t ip2int(const char * ipconvertint);
 
 char * int2ip(int inputintip);
 
 //I didn't feel another address_bytes_to_string was necesarry sry guys
-int bytes_to_string(char * resultzx, uint8_t * catx,int xbsize);
+int bytes_to_string(char * resultzx, const uint8_t * catx,int xbsize);
 
-char * address_string_to_bytes(struct protocol * xx, char * abc,size_t getsznow);
+char * address_string_to_bytes(struct protocol * xx, const char * abc, size_t getsznow);
 
-int string_to_bytes(uint8_t * finalbytes,int * realbbsize,char * strx, size_t strsize);
+int string_to_bytes(uint8_t * finalbytes,size_t* realbbsize,char * strx, size_t strsize);
 
 #endif

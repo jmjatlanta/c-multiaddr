@@ -8,25 +8,25 @@ int main()
 	strcat(addrstr,"/ip4/192.168.1.1/tcp/8080/");
 	printf("INITIAL: %s\n",addrstr);
 	struct MultiAddress* a;
-	a=new_maddr_fs(addrstr);
-	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize[0], a->bytes));
+	a= multiaddress_new_from_string(addrstr);
+	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize, a->bytes));
 	
 	//Remember, Decapsulation happens from right to left, never in reverse!
 	
 	printf("A STRING:%s\n",a->string);
-	m_encapsulate(a,"/ip4/192.31.200.1/udp/3333/");
+	multiaddress_encapsulate(a,"/ip4/192.31.200.1/udp/3333/");
 	printf("A STRING ENCAPSULATED:%s\n",a->string);
 	
-	m_decapsulate(a,"udp");
+	multiaddress_decapsulate(a,"udp");
 	printf("A STRING DECAPSULATED UDP:%s\n",a->string);
 	
-	m_encapsulate(a,"/tcp/8080");
+	multiaddress_encapsulate(a,"/tcp/8080");
 	printf("A STRING ENCAPSULATED TCP:%s\n",a->string);
 
 	struct MultiAddress* beta;
-	beta=new_maddr_fb(a->bytes,a->bsize[0]);
+	beta=multiaddress_new_from_bytes(a->bytes,a->bsize);
 	printf("B STRING: %s\n",beta->string);
 
-	maddr_free(a);
-	maddr_free(beta);
+	multiaddress_free(a);
+	multiaddress_free(beta);
 }

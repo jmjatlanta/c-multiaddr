@@ -31,7 +31,7 @@ uint64_t Hex_To_Int(char * hax);
 //
 void vthconvert(int size, char * crrz01, uint8_t * xbuf);
 
-char * Var_To_Hex(int realsize, uint8_t * TOHEXINPUT); //VAR[binformat] TO HEX
+char * Var_To_Hex(int realsize, const uint8_t * TOHEXINPUT); //VAR[binformat] TO HEX
 
 uint8_t * Hex_To_Var(char * Hexstr); //HEX TO VAR[BINFORMAT]
 
