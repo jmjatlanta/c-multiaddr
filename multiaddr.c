@@ -18,9 +18,9 @@ int strpos(char *haystack, char *needle)
 	}
 }
 
-struct maddr* new_maddr_fb(uint8_t* byteaddress,int size)//Construct new address from bytes
+struct MultiAddress* new_maddr_fb(uint8_t* byteaddress,int size)//Construct new address from bytes
 {
-	struct maddr* anewaddr2 = (struct maddr*)malloc(sizeof(struct maddr));
+	struct MultiAddress* anewaddr2 = (struct MultiAddress*)malloc(sizeof(struct MultiAddress));
 	if (anewaddr2 != NULL) {
 		if(byteaddress!=NULL)
 		{
@@ -33,9 +33,9 @@ struct maddr* new_maddr_fb(uint8_t* byteaddress,int size)//Construct new address
 	}
 	return anewaddr2;
 }
-struct maddr* new_maddr_fs(char * straddress)//Construct new address from string
+struct MultiAddress* new_maddr_fs(char * straddress)//Construct new address from string
 {
-	struct maddr* anewaddr = (struct maddr*)malloc(sizeof(struct maddr));
+	struct MultiAddress* anewaddr = (struct MultiAddress*)malloc(sizeof(struct MultiAddress));
 	if (anewaddr != NULL) {
 		bzero(anewaddr->string, 800);
 		strcpy(anewaddr->string, straddress);
@@ -54,11 +54,11 @@ struct maddr* new_maddr_fs(char * straddress)//Construct new address from string
 	return anewaddr;
 }
 
-void maddr_free(struct maddr* in) {
+void maddr_free(struct MultiAddress* in) {
 	free(in);
 }
 
-int m_encapsulate(struct maddr * result, char * string)
+int m_encapsulate(struct MultiAddress * result, char * string)
 {
 	if(result!=NULL&&string!=NULL)
 	{
@@ -82,7 +82,7 @@ int m_encapsulate(struct maddr * result, char * string)
 		return 0;
 	}
 }
-int m_decapsulate(struct maddr * result, char * srci)
+int m_decapsulate(struct MultiAddress * result, char * srci)
 {
 	if(result!=NULL && srci!=NULL)
 	{

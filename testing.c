@@ -7,7 +7,7 @@ int main()
 	bzero(addrstr,100);
 	strcat(addrstr,"/ip4/192.168.1.1/tcp/8080/");
 	printf("INITIAL: %s\n",addrstr);
-	struct maddr* a;
+	struct MultiAddress* a;
 	a=new_maddr_fs(addrstr);
 	printf("TEST BYTES: %s\n",Var_To_Hex(a->bsize[0], a->bytes));
 	
@@ -23,7 +23,7 @@ int main()
 	m_encapsulate(a,"/tcp/8080");
 	printf("A STRING ENCAPSULATED TCP:%s\n",a->string);
 
-	struct maddr* beta;
+	struct MultiAddress* beta;
 	beta=new_maddr_fb(a->bytes,a->bsize[0]);
 	printf("B STRING: %s\n",beta->string);
 
