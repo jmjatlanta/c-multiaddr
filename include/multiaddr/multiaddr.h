@@ -47,6 +47,8 @@ struct MultiAddress* multiaddress_new_from_string(const char* straddress); //Con
 
 void multiaddress_free(struct MultiAddress* in);
 
+int multiaddress_copy(const struct MultiAddress* source, struct MultiAddress* destination);
+
 int multiaddress_encapsulate(struct MultiAddress * result, char * string);
 
 int multiaddress_decapsulate(struct MultiAddress * result, char * srci);
